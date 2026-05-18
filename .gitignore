@@ -1,0 +1,15 @@
+node_modules/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Editor / OS junk
+.vscode/
+.idea/
+Thumbs.db
+
+# Local screenshots / scratch
+*.png
+.claude/

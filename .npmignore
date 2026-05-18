@@ -1,0 +1,16 @@
+node_modules/
+*.log
+.DS_Store
+.env
+.env.*
+.git/
+.gitignore
+.github/
+.claude/
+*.png
+package-lock.json
+
+# Tests / dev scratch
+test/
+tests/
+__tests__/

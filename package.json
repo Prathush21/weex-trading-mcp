@@ -1,0 +1,36 @@
+{
+  "name": "weex-trading-mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol (MCP) server for the WEEX Exchange API (Spot V3 + Futures/Contract V3). Exposes market data and signed trading/account tools over stdio.",
+  "type": "module",
+  "bin": {
+    "weex-trading-mcp": "./bin/weex-mcp.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node ./bin/weex-mcp.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "weex",
+    "crypto",
+    "exchange",
+    "trading",
+    "spot",
+    "futures",
+    "contract"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  }
+}
