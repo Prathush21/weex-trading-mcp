@@ -28,6 +28,15 @@
     "futures",
     "contract"
   ],
+  "author": "Prathushan Inparaj",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Prathush21/weex-trading-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Prathush21/weex-trading-mcp/issues"
+  },
+  "homepage": "https://github.com/Prathush21/weex-trading-mcp#readme",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
