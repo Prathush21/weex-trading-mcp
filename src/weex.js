@@ -110,8 +110,20 @@ export async function weexRequest({
   const init = { method, headers };
   if (bodyString) init.body = bodyString;
 
+  if (process.env.WEEX_DEBUG === "1") {
+    console.error(`[weex-debug] ${method} ${url}${bodyString ? ` body=${bodyString}` : ""}`);
+  }
+
   const res = await fetch(url, init);
   const data = await readJsonOrText(res);
+
+  if (process.env.WEEX_DEBUG === "1") {
+    const preview =
+      typeof data === "string"
+        ? data.slice(0, 200)
+        : JSON.stringify(data).slice(0, 200);
+    console.error(`[weex-debug] <- HTTP ${res.status} ${preview}${preview.length >= 200 ? "…" : ""}`);
+  }
 
   if (!res.ok) {
     const err = new Error(

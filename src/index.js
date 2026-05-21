@@ -21,6 +21,19 @@ import { weexRequest, hasCredentials } from "./weex.js";
 // tool result. Throwing rejects the call with an error.
 
 const SymbolStr = z.string().min(1).describe("Trading pair, e.g. BTCUSDT");
+
+// V2 contract market endpoints require lowercase symbols prefixed with `cmt_`
+// (e.g. `cmt_btcusdt`). Accept the V3 form and normalize transparently so
+// callers can use the same `BTCUSDT` notation everywhere.
+const toV2Symbol = (s) => {
+  if (!s) return s;
+  return /^cmt_/i.test(s) ? s.toLowerCase() : `cmt_${s.toLowerCase()}`;
+};
+
+const DepthLimit = z
+  .union([z.literal(15), z.literal(200)])
+  .describe("Depth levels: 15 or 200 (default 15)");
+
 const Interval = z
   .enum([
     "1m",
@@ -142,13 +155,7 @@ const tools = [
     description: "Spot: order book depth (bids/asks) for a symbol.",
     inputSchema: z.object({
       symbol: SymbolStr,
-      limit: z
-        .number()
-        .int()
-        .min(1)
-        .max(1000)
-        .optional()
-        .describe("Number of price levels per side"),
+      limit: DepthLimit.optional(),
     }),
     handler: (args) =>
       weexRequest({
@@ -264,13 +271,21 @@ const tools = [
         "Omit to retrieve all supported contracts"
       ),
     }),
-    handler: (args) =>
-      weexRequest({
+    handler: async (args) => {
+      const data = await weexRequest({
         product: "futures",
         method: "GET",
         path: "/capi/v3/market/exchangeInfo",
         query: args,
-      }),
+      });
+      // The endpoint ignores the `symbol` filter and returns every contract.
+      // Filter client-side so a single-symbol query doesn't return ~100KB.
+      if (args.symbol && data && Array.isArray(data.symbols)) {
+        const match = data.symbols.filter((s) => s.symbol === args.symbol);
+        return { ...data, symbols: match };
+      }
+      return data;
+    },
   },
   {
     name: "weex_futures_klines",
@@ -310,7 +325,7 @@ const tools = [
         product: "futures",
         method: "GET",
         path: "/capi/v2/market/trades",
-        query: args,
+        query: { ...args, symbol: toV2Symbol(args.symbol) },
       }),
   },
   {
@@ -318,7 +333,7 @@ const tools = [
     description: "Futures: order book depth for a contract symbol.",
     inputSchema: z.object({
       symbol: SymbolStr,
-      limit: z.number().int().min(1).max(1000).optional(),
+      limit: DepthLimit.optional(),
     }),
     handler: (args) =>
       weexRequest({
@@ -337,7 +352,7 @@ const tools = [
         product: "futures",
         method: "GET",
         path: "/capi/v2/market/open_interest",
-        query: args,
+        query: { symbol: toV2Symbol(args.symbol) },
       }),
   },
   {
@@ -349,7 +364,7 @@ const tools = [
         product: "futures",
         method: "GET",
         path: "/capi/v2/market/index",
-        query: args,
+        query: { symbol: toV2Symbol(args.symbol) },
       }),
   },
 
@@ -396,12 +411,22 @@ const tools = [
   {
     name: "weex_futures_current_orders",
     description: "Futures: get current (open) orders. SIGNED.",
-    inputSchema: z.object({ symbol: SymbolStr.optional() }),
+    inputSchema: z.object({
+      symbol: SymbolStr.optional(),
+      orderId: z
+        .string()
+        .optional()
+        .describe("Return orders with ID greater than this value"),
+      startTime: z.number().int().optional().describe("Start time in ms"),
+      endTime: z.number().int().optional().describe("End time in ms"),
+      limit: z.number().int().min(1).max(100).optional(),
+      page: z.number().int().min(0).optional().describe("0-indexed page"),
+    }),
     handler: (args) =>
       weexRequest({
         product: "futures",
         method: "GET",
-        path: "/capi/v3/order/current",
+        path: "/capi/v3/openOrders",
         query: args,
         signed: true,
       }),
@@ -473,6 +498,8 @@ function zodToJsonSchema(schema) {
   if (def.typeName === "ZodBoolean") return { type: "boolean" };
   if (def.typeName === "ZodEnum")
     return { type: "string", enum: def.values };
+  if (def.typeName === "ZodLiteral")
+    return { type: typeof def.value, const: def.value };
   if (def.typeName === "ZodArray")
     return { type: "array", items: zodToJsonSchema(def.type) };
   if (def.typeName === "ZodOptional" || def.typeName === "ZodDefault")
