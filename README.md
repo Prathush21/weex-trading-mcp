@@ -102,7 +102,7 @@ claude mcp add weex -- npx -y weex-trading-mcp
 | --- | --- |
 | `weex_futures_accounts` | `GET /capi/v2/account/getAccounts` |
 | `weex_futures_place_order` | `POST /capi/v3/order` |
-| `weex_futures_current_orders` | `GET /capi/v3/order/current` |
+| `weex_futures_current_orders` | `GET /capi/v3/openOrders` |
 | `weex_futures_cancel_order` | `DELETE /capi/v3/order` |
 
 ### Escape hatch
@@ -125,6 +125,19 @@ This server handles the signing transparently for tools marked **signed**.
 ## Safety
 
 Signed trading tools place real orders against your live WEEX account. Review every tool call before approving it in your MCP client, and only grant `WEEX_API_PASSPHRASE` to trusted environments. WEEX recommends binding API keys to specific IPs.
+
+## Support, issues & feature requests
+
+This project is open source and actively maintained — head over to the GitHub repo and have a look:
+
+**[github.com/Prathush21/weex-trading-mcp](https://github.com/Prathush21/weex-trading-mcp)**
+
+A few ways you can help:
+
+- **Star the repo** if you find it useful — it's the quickest way to show support and helps others discover the project.
+- **Report a bug** at [github.com/Prathush21/weex-trading-mcp/issues](https://github.com/Prathush21/weex-trading-mcp/issues). When opening an issue, please include the tool name, the arguments you used, and the error response if any. Run with `WEEX_DEBUG=1` set in the environment to capture the exact request URL and a response preview on stderr.
+- **Request an endpoint.** This server doesn't yet wrap every WEEX endpoint — if there's one you need (margin, sub-account, position management, conditional orders, etc.), open an issue describing the endpoint, the WEEX docs link, and your use case. In the meantime, the `weex_signed_request` escape-hatch tool lets you call any endpoint by hand.
+- **Pull requests welcome** — small, focused PRs (one fix or one new tool) are easiest to review.
 
 ## License
 
