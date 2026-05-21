@@ -1,6 +1,6 @@
 {
   "name": "weex-trading-mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Model Context Protocol (MCP) server for the WEEX Exchange API (Spot V3 + Futures/Contract V3). Exposes market data and signed trading/account tools over stdio.",
   "type": "module",
   "bin": {
